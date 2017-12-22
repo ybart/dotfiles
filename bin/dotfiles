@@ -24,7 +24,6 @@ global = OptionParser.new do |opts|
   opts.separator subtext
 end
 
-
 subcommands = {
   'help' => OptionParser.new do |opts|
      opts.banner = "Usage: help [command]"
@@ -34,6 +33,9 @@ subcommands = {
   end,
   'remove' => OptionParser.new do |opts|
      opts.banner = "Usage: remove file1 [file2 ...]"
+  end,
+  'setup' => OptionParser.new do |opts|
+     opts.banner = "Usage: setup"
   end
 }
 
@@ -50,12 +52,15 @@ def dotfiles_path
 end
 
 def git(*args)
+  run "git #{args.map(&:shellescape).join(' ')}"
+end
+
+def run(cmd)
   old_pwd = pwd
 
   cd dotfiles_path
-  `git #{args.map(&:shellescape).join(' ')}`
+  system cmd
   cd old_pwd
-  
 end
 
 def add(files, options)
@@ -75,6 +80,25 @@ def remove(files, options)
   # Check destination
   # Remove from git
   # Move back
+end
+
+def setup(files, options)
+  # Install Homebrew
+  system %q(/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)")
+
+  # Install Homebrew Cask
+  system %q(brew tap caskroom/cask)  
+
+  # Restore tree
+  run 'touch Brewfile'
+  run 'brew bundle'
+
+  # Install Oh My ZSH!
+  system %q(sh -c "$(curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh)")
+
+  # Install RVM
+  system %q(gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 7D2BAF1CF37B13E2069D6956105BD0E739499BDB)
+  system %q(curl -sSL https://get.rvm.io | bash -s stable)
 end
 
 #puts "Command: #{command} "
