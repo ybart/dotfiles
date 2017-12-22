@@ -11,14 +11,18 @@
 
 1. cd ~
 2. git clone git@github.com:ybart/dotfiles.git
+3. ./dotfiles/bin/dotfiles setup
+
+# Track a dotfile
+
+You can track a dotfile by issuing the following command:
+
+./dotfiles/bin/dotfiles add .gitconfig Brewfile
 
 # TODO
 
-- Git aliases
-- Git configuration
-- Setup Homebrew
-- Setup Homebrew casks (Tools, Browsers, Editors, etc.)
 - Setup Oh-my-zsh
-- Setup RVM
 - Setup Editor configuration / Plugins
+- Terminal settings
 - System configuration
+- Add dotfiles to path
