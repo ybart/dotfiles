@@ -1,0 +1,86 @@
+#!/usr/bin/env ruby
+
+# Credits: @rkumar https://gist.github.com/rkumar/445735
+
+require 'optparse'
+require 'fileutils'
+require 'shellwords'
+
+extend FileUtils
+
+options     = {}
+
+subtext = <<HELP
+Commonly used command are:
+   add:     add tracking for one or more dotfiles
+   remove:  remove tracking for one or more dotfiles
+
+See 'dotfiles command --help' for more information on a specific command.
+HELP
+
+global = OptionParser.new do |opts|
+  opts.banner = "Usage: dotfiles [options] subcommand [subcommand options]"
+  opts.separator ""
+  opts.separator subtext
+end
+
+
+subcommands = {
+  'help' => OptionParser.new do |opts|
+     opts.banner = "Usage: help [command]"
+  end,
+  'add'  => OptionParser.new do |opts|
+     opts.banner = "Usage: add file1 [file2 ...]"
+  end,
+  'remove' => OptionParser.new do |opts|
+     opts.banner = "Usage: remove file1 [file2 ...]"
+  end
+}
+
+global.order!
+command = ARGV.shift || 'help'
+subcommands[command].order!
+
+def help(command, options)
+  STDERR.puts "Displaying help for #{command} #{options}"
+end
+
+def dotfiles_path
+  "#{ENV['HOME'].shellescape}/dotfiles/"
+end
+
+def git(*args)
+  old_pwd = pwd
+
+  cd dotfiles_path
+  `git #{args.map(&:shellescape).join(' ')}`
+  cd old_pwd
+  
+end
+
+def add(files, options)
+  files.each do |file|
+    basename = File.basename file
+    mv file, dotfiles_path
+    ln_s "#{dotfiles_path}#{basename}".shellescape, ENV['HOME']
+    git 'add', basename
+  end
+
+  basenames = files.map { |file| File.basename file }
+  git 'commit', '-m', "Add #{basenames.join(', ')}."
+end
+
+def remove(files, options)
+  # Unlink
+  # Check destination
+  # Remove from git
+  # Move back
+end
+
+#puts "Command: #{command} "
+#p options
+#puts "ARGV:"
+#p ARGV
+
+send(command, ARGV, options)
+
