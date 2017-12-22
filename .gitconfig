@@ -1,2 +1,6 @@
 [user]
 	name = Yvan BARTHÉLEMY
+[alias]
+	co = checkout
+	ci = commit
+	st = status
